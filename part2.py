@@ -1,7 +1,9 @@
 import numpy as num
+from numpy import zeros
 import random
 from scipy import stats
 import matplotlib.pyplot as plt
+
 
 # integer K number of houses > 0
 k = 1000
@@ -31,9 +33,27 @@ z = Bin.rvs(n)          #Generate n Bin(k, q) random variates
 
 
 # estimation for P(X <= 1)
-estMostOne = num.sum(z <= 1)/n
-print("number of successes: " + str(estMostOne*n))
-print("probability of successes less than or equal to 1: " + str(estMostOne))
+cdfResult = Bin.cdf(1)
+
+formulaResult = ((1-q)**k) + (k*q*((1-q)**(k-1)))
+
+print("(A) Cumulative Distribution Function probability of 1 or less house being damaged: " + str(cdfResult))
+print("Derived equation probability of 1 or less house being damaged: " + str(formulaResult))
+
+
+x = num.arange(0, 2)
+cdf_values = Bin.cdf(x)
+
+
+plt.plot(x, cdf_values, linestyle='-', color='b')
+plt.xlabel('X')
+plt.ylabel('CDF')
+plt.title('(A)')
+plt.grid(True)
+
+
+
+
 
 # (B) Give the distribution of the number N of damaged houses.
 # Also give the mean and probability distribution of the number of houses
@@ -78,7 +98,7 @@ plt.xlabel("amount of damage")
 print("(B) mean: " + str(num.mean(R)))
 print("(B) variance: " + str(num.var(R)))
 plt.hist(R)
-plt.show()
+# plt.show()
 
 # now compute the probablity of the probability Q
 # i.e P(R > 20 000) = estMoreThan20 * q
@@ -86,3 +106,33 @@ plt.show()
 # (D) Give the distribution of the total amount
 # that is going to be paid after the earthquake
 
+totalPayment = 0
+payments = zeros(k)
+
+for i in range(k):
+    damageInt = random.random()
+    insuranceInt = random.random()
+
+    if damageInt < q:
+        payment = 0
+    elif (damageInt > q and insuranceInt < p):
+        payment = 5000
+    elif (damageInt > q and insuranceInt > p):
+        payment = stats.expon.rvs(scale=10000, size=1)
+    
+    payments[i] = payment
+    totalPayment = totalPayment + payment
+
+
+print("Total payment: " + str(totalPayment))
+print(payments)
+    
+plt.figure()
+plt.title("(D)")
+plt.ylabel("probability")
+#Divide by n later and add % sign
+plt.xlabel("payment amount")
+print("(D) mean: " + str(num.mean(payments)))
+print("(D) variance: " + str(num.var(payments)))
+plt.hist(payments)
+plt.show()
