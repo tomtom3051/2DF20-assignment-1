@@ -106,33 +106,51 @@ plt.hist(R)
 # (D) Give the distribution of the total amount
 # that is going to be paid after the earthquake
 
-totalPayment = 0
-payments = zeros(k)
+#Set up the number of trials
+n = 1000
 
-for i in range(k):
-    damageInt = random.random()
-    insuranceInt = random.random()
+#Set up an empty array to store the results of each trial
+totalPayments = zeros(n)
 
-    if damageInt < q:
-        payment = 0
-    elif (damageInt > q and insuranceInt < p):
-        payment = 5000
-    elif (damageInt > q and insuranceInt > p):
-        payment = stats.expon.rvs(scale=10000, size=1)
+#For each trial calculate the total payment value
+for j in range(n):
+    #Initially reset the total payment to 0
+    totalPayment = 0
+
+    #Then calculate the individual payment for each house
+    for i in range(k):
+        #Use float to simulate if house is damaged
+        damageInt = random.random()
+
+        #Use float to simulate if house is insured
+        insuranceInt = random.random()
+
+        #If undamaged no payment is made
+        if damageInt < q:
+            payment = 0
+        
+        #If damaged and uninsured payment = 5000
+        elif (damageInt > q and insuranceInt < p):
+            payment = 5000
+        
+        #If damaged and insured payment is calculated
+        elif (damageInt > q and insuranceInt > p):
+            payment = stats.expon.rvs(scale=10000, size=1)[0]
+        
+        #Add each payment to the total
+        totalPayment = totalPayment + payment
     
-    payments[i] = payment
-    totalPayment = totalPayment + payment
+    #Once all payments are calculated store the result
+    totalPayments[j] = totalPayment
 
+#Print out the mean value and the variance
+print("(D) Mean total payment amount: " + str(num.mean(totalPayments)))
+print("(D) Variance in total payment amount: " + str(num.var(totalPayments)))
 
-print("Total payment: " + str(totalPayment))
-print(payments)
-    
 plt.figure()
 plt.title("(D)")
 plt.ylabel("probability")
 #Divide by n later and add % sign
-plt.xlabel("payment amount")
-print("(D) mean: " + str(num.mean(payments)))
-print("(D) variance: " + str(num.var(payments)))
-plt.hist(payments)
+plt.xlabel("Total payment amount")
+plt.hist(totalPayments)
 plt.show()
