@@ -14,6 +14,10 @@ q = 0.1
 # probability of being insured 0 < P < 1
 p = 0.1
 
+# Exp distribution for R
+Exp = stats.expon(scale = 10000)
+
+
 # (A) What is the probability that 
 # at most one house is damaged after the earthquake?
 
@@ -29,7 +33,8 @@ p = 0.1
 
 Bin = stats.binom(k, q) #Binomial distribution with parameters k and q
 n = 100
-z = Bin.rvs(n)          #Generate n Bin(k, q) random variates 
+n_damaged= Bin.rvs(n)          #Generate n Bin(k, q) random variates 
+
 
 
 # estimation for P(X <= 1)
@@ -61,12 +66,34 @@ plt.grid(True)
 plt.figure()
 plt.title("(B)")
 plt.ylabel("probability")
-#Divide by n later and add % sign
 plt.xlabel("number of damaged houses")
-print("(B) mean: " + str(num.mean(z)))
-print("(B) variance: " + str(num.var(z)))
-plt.hist(z)
-#plt.show()
+print("(B) mean: " + str(num.mean(n_damaged)))
+print("(B) variance: " + str(num.var(n_damaged)))
+plt.hist(n_damaged, weights=num.ones(len(n_damaged)) / len(n_damaged))
+plt.show()
+
+
+# (B)(2)
+n_sim = 100
+n_5000 = num.empty(0)
+for i in range(n_sim):
+    n_damaged = Bin.rvs(1)
+    
+    Bin_insured = stats.binom(n_damaged, p)
+    n_insured = Bin_insured.rvs(1)
+
+    n_not_insured = n_damaged - n_insured
+    n_5000 = num.append(n_5000, n_not_insured)
+
+print(num.mean(n_5000))
+
+plt.figure()
+plt.title("(B)")
+plt.ylabel("probability")
+plt.xlabel("number of houses receiving exactly 5000")
+plt.hist(n_5000, weights=num.ones(len(n_5000)) / len(n_5000))
+plt.show()
+
 
 # (C) Take one arbitrary hosue. What is the probability
 # that for this house an amount of more than 20 000 euros
@@ -74,34 +101,26 @@ plt.hist(z)
 
 # Let R denote the amount of reimbursement
 # P(R > 20 000)????
-# we know that a damage has q probability to be damager
-# and that if the house is not damaged then it is not insured
-# and cannot receive more than 20 000 reimbursement
-# P(R > 20 000) <= q;
+# we know that a damage has q probability to be damage
+# and that for a has to received > 20000 it must be both damaged and insured
+# thus P(R > 20 000) = q * p * P(R > 20 000 | Q and R)
+# where Q and R are the events that the house is damaged and that the house is insured
 # now we look at the case where the house is damaged and receives insurance
 # we know that then R ~ Exp() with mean 10 000
 
-Exp = stats.expon(scale = 10000)
-n = 10000
+#Exp = stats.expon(scale = 10000) needed for (B)(2) so it was relocated to the beginning of the py file
+n = 1000000
 R = Exp.rvs(n)      #Generate n Exp(10 000) random variates
+#added to verify the mean
 Rmean = num.mean(R)
 print("Mean amount of damages: " + str(Rmean))
 
-# estimation for P(R > 20 000)
+# estimation for P(R > 20 000 | Q and R)
 estMoreThan20 = num.sum(R > 20000 )/n
-print("Probability of more than 20" + str(estMoreThan20))
-plt.figure()
-plt.title("(C)")
-plt.ylabel("probability")
-#Divide by n later and add % sign
-plt.xlabel("amount of damage")
-print("(B) mean: " + str(num.mean(R)))
-print("(B) variance: " + str(num.var(R)))
-plt.hist(R)
-# plt.show()
+print("Probability of more than 20: " + str(estMoreThan20))
+print("(C) mean: " + str(num.mean(R)))
+print("(C) variance: " + str(num.var(R)))
 
-# now compute the probablity of the probability Q
-# i.e P(R > 20 000) = estMoreThan20 * q
 
 # (D) Give the distribution of the total amount
 # that is going to be paid after the earthquake
