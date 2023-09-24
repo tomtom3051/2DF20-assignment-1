@@ -56,10 +56,6 @@ plt.ylabel('CDF')
 plt.title('(A)')
 plt.grid(True)
 
-
-
-
-
 # (B) Give the distribution of the number N of damaged houses.
 # Also give the mean and probability distribution of the number of houses
 # that receive exactly 5000 euros.
